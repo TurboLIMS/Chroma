@@ -7,7 +7,6 @@ module ReportReader
     attr_accessor :debug,
                   :opts,
                   :filename,
-                  :file_content,
                   :header,
                   :rows
 
@@ -41,6 +40,7 @@ module ReportReader
       when 'pdf'
         parse_pdf
       when 'csv'
+        raise ReportReader::NotSupported.new("not implemented!")
       end
 
       true
