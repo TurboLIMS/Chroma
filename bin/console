@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'yaml'
+
+$spec_config = YAML.load_file('./spec/spec_config.yml')
+
+require 'ReportReader'
+
+ReportReader.configure do |config|
+  config.option = $spec_config['option']
+end
+
+
+$client = ReportReader::Base.new(debug: true)
+
+require "pry"
+puts "use $client"
+Pry.start
