@@ -64,7 +64,7 @@ describe ReportReader do
     expect(parser.rows.count).to eq(8)
   end
 
-  it "can generate a valid CSV from PDF (report_1) given the correct options" do
+  it "generates a valid CSV from PDF (report_1) given the correct options" do
     parser =
       ReportReader::Base.new(
         debug: true,
@@ -108,7 +108,7 @@ CCV1,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000\n")
     expect(parser.rows.count).to eq(3)
   end
 
-  it "can generate a valid CSV from PDF (report_2) given the correct options" do
+  it "generates a valid CSV from PDF (report_2) given the correct options" do
     parser =
       ReportReader::Base.new(
         debug: true,
@@ -147,7 +147,7 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
     expect(parser.rows.count).to eq(2)
   end
 
-  it "can generate a valid CSV from PDF (report_3) given the correct options" do
+  it "generates a valid CSV from PDF (report_3) given the correct options" do
     parser =
       ReportReader::Base.new(
         debug: true,
@@ -165,7 +165,7 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
     expect(parser.to_csv).to eq("Sample ID,_THC,_CBD,_CBN\n99,0.03 %,0.0 %,8.2 %\n100,0.0 %,12.7 %,0.0%\n")
   end
 
-  it "can programmatically skip columns" do
+  it "skips columns programmatically with skip_column" do
     parser =
       ReportReader::Base.new(
         debug: true,
@@ -183,7 +183,7 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
     expect(parser.rows.count).to eq(17)
   end
 
-  it "can programmatically skip sample-id" do
+  it "skip sample-id programmatically with reject_sample_regex" do
     parser =
       ReportReader::Base.new(
         debug: true,
@@ -201,7 +201,44 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
     expect(parser.rows.count).to eq(14)
   end
 
-  
+  it "reorders columns programmatically with header_sort" do
+    parser =
+      ReportReader::Base.new(
+        debug: true,
+        filename: './spec/report_5.pdf',
+        header_regex: %r(^\s+Sample\s+),
+        skip_column: [1,3,5,7,9,11],
+        header_sort: %w(Sample THC THCA CBD CBDA CBN CBG),
+        row_regex: %r(^\s*\#\s+),
+        column_regex: %r(\s+),
+        should_scrub_regex: true,
+        reject_sample_regex: %r(\D)
+      )
+
+    expect { parser.parse! }
+      .not_to raise_error
+
+    expect(parser.header).to eq(["Sample", "THC", "THCA", "CBD", "CBDA", "CBN", "CBG"])
+    expect(parser.rows.find{|row| row[0] == '9439'}).to eq(["9439", "2492.06452", "0.00000", "2.91509", "0.00000", "136.54918", "0.00000"])
+  end
+
+  it "rejects an incompatible header_sort directive" do
+    parser =
+      ReportReader::Base.new(
+        debug: true,
+        filename: './spec/report_5.pdf',
+        header_regex: %r(^\s+Sample\s+),
+        skip_column: [1,3,5,7,9,11],
+        header_sort: %w(Sample Thc_ Thca_ Cbd_ Cbda_ Cbn_ Cbg_),
+        row_regex: %r(^\s*\#\s+),
+        column_regex: %r(\s+),
+        should_scrub_regex: true,
+        reject_sample_regex: %r(\D)
+      )
+
+    expect { parser.parse! }
+      .to raise_error(ReportReader::Errors::BadInput)
+  end
 
   private
 

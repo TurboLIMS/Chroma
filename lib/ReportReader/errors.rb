@@ -4,5 +4,6 @@ module ReportReader
     class MissingParameter < RuntimeError; end
     class NotFound < RuntimeError; end
     class NotSupported < RuntimeError; end
+    class BadInput < RuntimeError; end
   end
 end

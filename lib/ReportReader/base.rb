@@ -85,6 +85,17 @@ module ReportReader
           next if opts[:reject_sample_regex] && row[0] =~ opts[:reject_sample_regex]
           rows.push(row)
         end
+      end # end of line parsing
+
+      if opts[:header_sort] && opts[:header_sort] != header
+        raise ReportReader::BadInput.new(
+          "Incorrect header_sort parameter: #{opts[:header_sort].sort} != #{header.sort}"
+        ) if opts[:header_sort].sort != header.sort
+
+        index_vector = opts[:header_sort].map {|el| header.index(el)}
+        transposed_rows = rows.transpose
+        self.header = opts[:header_sort]
+        self.rows = index_vector.map {|idx| transposed_rows[idx] }.transpose
       end
 
     end
