@@ -1,4 +1,4 @@
-module ReportReader
+module Chroma
   class Configuration
     attr_accessor :option
 

@@ -1,4 +1,4 @@
-module ReportReader
+module Chroma
   module Errors
     class MissingConfiguration < RuntimeError; end
     class MissingParameter < RuntimeError; end

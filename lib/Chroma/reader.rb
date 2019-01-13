@@ -1,27 +1,48 @@
-module ReportReader
-  include Constants
+module Chroma
   include Errors
 
-  class Base
+  class Reader
 
     attr_accessor :debug,
                   :opts,
-                  :filename,
+                  :input,
                   :header,
                   :rows
 
     EXT_REGEX = %r(\.(pdf|csv)\z)
 
     def initialize(opts = {})
-      self.opts     = opts
-      self.filename = opts[:filename]
-      self.rows     = []
-
+      self.opts  = opts
+      self.input = opts[:input]
+      self.rows  = []
       self.debug = opts[:debug]
     end
 
+    def self.help
+"# Input options for the Chroma::Reader constructor
+#
+# input: File or file_path of the report to read
+# header_regex: RE to identify the header row
+# header_column_regex: RE to identify the header column separator (overwrites column_regex)
+# header_skip_column: array of indexes of columns to ignore (overwrites skip_column)
+# header_append: array of elements to append to the header
+# header_prepend: array of elements to prepend to the header
+# header_sort: array of strings to sepcify the order of columns
+# row_regex: RE to indentify data rows
+# column_regex: RE to identify the column separator
+# skip_column: array of indexes of columns to ignore
+# should_scrub_regex: RE to remove a ancor from data rows
+# reject_sample_regex: RE to reject sample-id
+#"
+    end
+
     def valid_file?
-      filename && File.exist?(filename)
+      !input.nil? &&
+        ( input.is_a?(File) || File.exist?(input) )
+    end
+
+    def filename
+      input.respond_to?(:path) ? input.path : input
     end
 
     def valid_filetype?
@@ -29,18 +50,18 @@ module ReportReader
     end
 
     def filetype
-      filename && filename.match(EXT_REGEX)[1]
+      filename.match(EXT_REGEX)[1]
     end
 
     def parse!
-      raise ReportReader::NotFound.new("file not found: #{filename}") if !valid_file?
-      raise ReportReader::NotSupported.new("file type not supported: #{filename}") if !valid_filetype?
+      raise Chroma::NotFound.new("file not found: #{input}") if !valid_file?
+      raise Chroma::NotSupported.new("file type not supported: #{input}") if !valid_filetype?
 
       case filetype
       when 'pdf'
         parse_pdf
       when 'csv'
-        raise ReportReader::NotSupported.new("not implemented!")
+        raise Chroma::NotSupported.new("not implemented!")
       end
 
       true
@@ -58,7 +79,7 @@ module ReportReader
     private
 
     def parse_pdf
-      reader = PDF::Reader.new(filename)
+      reader = PDF::Reader.new(input)
       lines  = reader.pages.first.text.split(%r(\n))
       while (line = lines.shift)
 
@@ -88,7 +109,7 @@ module ReportReader
       end # end of line parsing
 
       if opts[:header_sort] && opts[:header_sort] != header
-        raise ReportReader::BadInput.new(
+        raise Chroma::BadInput.new(
           "Incorrect header_sort parameter: #{opts[:header_sort].sort} != #{header.sort}"
         ) if opts[:header_sort].sort != header.sort
 
@@ -101,7 +122,7 @@ module ReportReader
     end
 
     def configuration
-      ReportReader.configuration
+      Chroma.configuration
     end
   end
 end

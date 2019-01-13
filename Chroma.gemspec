@@ -1,15 +1,15 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'ReportReader/version'
+require 'Chroma/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'ReportReader'
-  spec.version       = ReportReader::VERSION
+  spec.name          = 'Chroma'
+  spec.version       = Chroma::VERSION
   spec.authors       = ['Emanuele Tozzato']
   spec.email         = ['etozzato@gmail.com']
 
-  spec.summary       = %q{ReportReader is a PDF and CSV parser for chromatography batch report}
+  spec.summary       = %q{Chroma is a PDF and CSV parser for chromatography batch report}
   spec.description   = %q{A simple gem to extract SampleID, Analyte and Concentration from chromatography instruments}
   spec.homepage      = 'https://AINZCorp.com'
   spec.license       = 'MIT'

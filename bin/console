@@ -5,14 +5,14 @@ require 'yaml'
 
 $spec_config = YAML.load_file('./spec/spec_config.yml')
 
-require 'ReportReader'
+require 'Chroma'
 
-ReportReader.configure do |config|
+Chroma.configure do |config|
   config.option = $spec_config['option']
 end
 
 
-$client = ReportReader::Base.new(debug: true)
+$client = Chroma::Reader.new(debug: true)
 
 require "pry"
 puts "use $client"
