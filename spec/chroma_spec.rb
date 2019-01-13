@@ -29,6 +29,12 @@ describe Chroma do
       .not_to raise_error
   end
 
+  it 'is not parsed? at initialization' do
+    parser = Chroma::Reader.new(debug: true)
+
+    expect(parser.parsed?).to be false
+  end
+
   it "accepts a file name during initialization" do
     parser = Chroma::Reader.new(debug: true, input: 'file.txt')
 
@@ -62,6 +68,7 @@ describe Chroma do
       expect { parser.parse! }
         .not_to raise_error
 
+      expect(parser.parsed?).to be true
       expect(parser.header).to eq(["Sample", "CBDA", "CBG", "CBD", "CBN", "THC", "THCA"])
       expect(parser.rows.count).to eq(8)
     end

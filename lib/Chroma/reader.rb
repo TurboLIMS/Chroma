@@ -76,6 +76,10 @@ module Chroma
       end
     end
 
+    def parsed?
+      !header.nil?
+    end
+
     private
 
     def parse_pdf
