@@ -32,8 +32,7 @@ module Chroma
 # column_regex: RE to identify the column separator
 # skip_column: array of indexes of columns to ignore
 # should_scrub_regex: RE to remove a ancor from data rows
-# reject_sample_regex: RE to reject sample-id
-#"
+# reject_sample_regex: RE to reject sample-id"
     end
 
     def valid_file?
