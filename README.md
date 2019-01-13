@@ -25,5 +25,5 @@ Sample_37 341.68 780.786 679.52 843.436 613.123 729.566 94.02 454.303 584.151 15
 * row_regex: RE to indentify data rows
 * column_regex: RE to identify the column separator
 * skip_column: array of indexes of columns to ignore
-* should_scrub_regex: RE to remove a ancor from data rows
+* should_scrub_re: RE to remove a ancor from data rows
 * reject_sample_regex: RE to reject sample-id

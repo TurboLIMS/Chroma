@@ -1,5 +1,6 @@
 module Chroma
   include Errors
+  include Helper
 
   class Reader
 
@@ -31,7 +32,7 @@ module Chroma
 # row_regex: RE to indentify data rows
 # column_regex: RE to identify the column separator
 # skip_column: array of indexes of columns to ignore
-# should_scrub_regex: RE to remove a ancor from data rows
+# should_scrub_re: RE to remove a ancor from data rows
 # reject_sample_regex: RE to reject sample-id"
     end
 
@@ -82,8 +83,9 @@ module Chroma
       lines  = reader.pages.first.text.split(%r(\n))
       while (line = lines.shift)
 
-        if !header && line =~ opts[:header_regex]
-          self.header = line.strip.split(opts[:header_column_regex] || opts[:column_regex])
+        if !header && line =~ Helper.maybe_regex(opts[:header_regex])
+          header_column_regex = opts[:header_column_regex] || opts[:column_regex]
+          self.header = line.strip.split(Helper.maybe_regex(header_column_regex))
           if opts[:header_skip_column] || opts[:skip_column]
             (opts[:header_skip_column] || opts[:skip_column]).each {|idx| self.header[idx] = nil }
             self.header.compact!
@@ -92,17 +94,17 @@ module Chroma
           header.push(opts[:header_append]) if opts[:header_append]
         end
 
-        if header && line =~ opts[:row_regex]
+        if header && line =~ Helper.maybe_regex(opts[:row_regex])
           row = line
-          row.gsub!(opts[:row_regex],'') if opts[:should_scrub_regex]
-          row = row.strip.split(opts[:column_regex])
+          row.gsub!(Helper.maybe_regex(opts[:row_regex]),'') if opts[:should_scrub_re]
+          row = row.strip.split(Helper.maybe_regex(opts[:column_regex]))
           if opts[:skip_column]
             opts[:skip_column].each {|idx| row[idx] = nil }
             row.compact!
           end
 
           next unless row.length == header.length
-          next if opts[:reject_sample_regex] && row[0] =~ opts[:reject_sample_regex]
+          next if opts[:reject_sample_regex] && row[0] =~ Helper.maybe_regex(opts[:reject_sample_regex])
           rows.push(row)
         end
       end # end of line parsing

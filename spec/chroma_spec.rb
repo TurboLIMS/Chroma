@@ -57,7 +57,7 @@ describe Chroma do
           header_regex: %r(\s*Sample\s+),
           row_regex: %r(^\s([*#]){1,2}\s),
           column_regex: %r(\s+),
-          should_scrub_regex: true
+          should_scrub_re: true
         )
       expect { parser.parse! }
         .not_to raise_error
@@ -74,7 +74,7 @@ describe Chroma do
           header_regex: %r(\s*Sample\s+),
           row_regex: %r(^\s([*#]){1,2}\s),
           column_regex: %r(\s+),
-          should_scrub_regex: true
+          should_scrub_re: true
         )
       expect { parser.parse! }
         .not_to raise_error
@@ -100,7 +100,7 @@ CCV1,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000\n")
           header_column_regex: %r(\s\|\|\s),
           row_regex: %r(^Sample_),
           column_regex: %r(\s+),
-          should_scrub_regex: false
+          should_scrub_re: false
         )
 
         expect { parser.parse! }
@@ -119,7 +119,7 @@ CCV1,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000\n")
           header_column_regex: %r(\s\|\|\s),
           row_regex: %r(^Sample_),
           column_regex: %r(\s+),
-          should_scrub_regex: false
+          should_scrub_re: false
         )
       expect { parser.parse! }
         .not_to raise_error
@@ -139,7 +139,7 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
           header_prepend: 'Sample ID',
           row_regex: %r(\s%),
           column_regex: %r(\s{2,}),
-          should_scrub_regex: false
+          should_scrub_re: false
         )
 
         expect { parser.parse! }
@@ -158,7 +158,7 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
           header_prepend: 'Sample ID',
           row_regex: %r(\s%),
           column_regex: %r(\s{2,}),
-          should_scrub_regex: false
+          should_scrub_re: false
         )
 
         expect { parser.parse! }
@@ -176,7 +176,25 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
           skip_column: [1,3,5,7,9,11],
           row_regex: %r(^\s*\#\s+),
           column_regex: %r(\s+),
-          should_scrub_regex: true
+          should_scrub_re: true
+        )
+
+      expect { parser.parse! }
+        .not_to raise_error
+      expect(parser.header).to eq(["Sample", "CBDA", "CBG", "CBD", "CBN", "THC", "THCA"])
+      expect(parser.rows.count).to eq(17)
+    end
+
+    it "accepts strings as regular expressions" do
+      parser =
+        Chroma::Reader.new(
+          debug: true,
+          input: './spec/report_5.pdf',
+          header_regex: "^\s+Sample\s+",
+          skip_column: [1,3,5,7,9,11],
+          row_regex: "^\s*\#\s+",
+          column_regex: /\s+/,
+          should_scrub_re: true
         )
 
       expect { parser.parse! }
@@ -194,7 +212,7 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
           skip_column: [1,3,5,7,9,11],
           row_regex: %r(^\s*\#\s+),
           column_regex: %r(\s+),
-          should_scrub_regex: true,
+          should_scrub_re: true,
           reject_sample_regex: %r(\D)
         )
 
@@ -213,7 +231,7 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
           header_sort: %w(Sample THC THCA CBD CBDA CBN CBG),
           row_regex: %r(^\s*\#\s+),
           column_regex: %r(\s+),
-          should_scrub_regex: true,
+          should_scrub_re: true,
           reject_sample_regex: %r(\D)
         )
 
@@ -234,7 +252,7 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
           header_sort: %w(Sample Thc_ Thca_ Cbd_ Cbda_ Cbn_ Cbg_),
           row_regex: %r(^\s*\#\s+),
           column_regex: %r(\s+),
-          should_scrub_regex: true,
+          should_scrub_re: true,
           reject_sample_regex: %r(\D)
         )
 
@@ -253,7 +271,7 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
           header_prepend: 'Sample ID',
           row_regex: %r(\s%),
           column_regex: %r(\s{2,}),
-          should_scrub_regex: false
+          should_scrub_re: false
         )
 
         expect { parser.parse! }
@@ -272,7 +290,7 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
           header_prepend: 'Sample ID',
           row_regex: %r(\s%),
           column_regex: %r(\s{2,}),
-          should_scrub_regex: false
+          should_scrub_re: false
         )
 
         expect { parser.parse! }
