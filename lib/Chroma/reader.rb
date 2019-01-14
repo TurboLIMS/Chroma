@@ -20,8 +20,8 @@ module Chroma
     end
 
     def self.help
-"# Input options for the Chroma::Reader constructor
-#
+"# Input options for the Chroma::Reader GEM initialization
+
 # input: File or file_path of the report to read
 # header_regex: RE to identify the header row
 # header_column_regex: RE to identify the header column separator (overwrites column_regex)
@@ -34,6 +34,22 @@ module Chroma
 # skip_column: array of indexes of columns to ignore
 # should_scrub_re: RE to remove a ancor from data rows
 # reject_sample_regex: RE to reject sample-id"
+    end
+
+    def self.configuration_options
+      %i(
+        header_regex
+        header_column_regex
+        header_skip_column
+        header_append
+        header_prepend
+        header_sort
+        row_regex
+        column_regex
+        skip_column
+        should_scrub_re
+        reject_sample_regex
+      )
     end
 
     def valid_file?
