@@ -73,6 +73,26 @@ describe Chroma do
       expect(parser.rows.count).to eq(8)
     end
 
+    it "rejects incorrect, nil and empty options" do
+      parser =
+        Chroma::Reader.new(
+          debug: true,
+          input: './spec/report_1.pdf',
+          header_regex: %r(\s*Sample\s+),
+          ainz: 100,
+          header_prepend: "",
+          row_regex: %r(^\s([*#]){1,2}\s),
+          column_regex: %r(\s+),
+          should_scrub_re: true
+        )
+      expect { parser.parse! }
+        .not_to raise_error
+
+      expect(parser.parsed?).to be true
+      expect(parser.header).to eq(["Sample", "CBDA", "CBG", "CBD", "CBN", "THC", "THCA"])
+      expect(parser.rows.count).to eq(8)
+    end
+
     it "generates a valid CSV from PDF (report_1) given the correct options" do
       parser =
         Chroma::Reader.new(
