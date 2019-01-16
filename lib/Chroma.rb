@@ -6,6 +6,8 @@ require 'Chroma/helper'
 require 'Chroma/reader'
 require 'Chroma/version'
 
+I18n.load_path += Dir.glob( File.dirname(__FILE__) + "lib/locales/*.{rb,yml}" ) if defined?(I18n)
+
 module Chroma
   def self.configuration
     @configuration ||= Configuration.new
