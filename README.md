@@ -16,14 +16,22 @@ Sample_37 341.68 780.786 679.52 843.436 613.123 729.566 94.02 454.303 584.151 15
 ### Input options for the Chroma::Reader constructor
 
 * input: File or file_path of the report to read
+
+##### PDF options
+
 * header_regex: RE to identify the header row
 * header_column_regex: RE to identify the header column separator (overwrites column_regex)
 * header_skip_column: array of indexes of columns to ignore (overwrites skip_column)
 * header_append: array of elements to append to the header
 * header_prepend: array of elements to prepend to the header
-* header_sort: array of strings to sepcify the order of columns
-* row_regex: RE to indentify data rows
+* header_sort: array of strings to specify the order of columns
+* row_regex: RE to identify data rows
 * column_regex: RE to identify the column separator
 * skip_column: array of indexes of columns to ignore
-* should_scrub_re: RE to remove a ancor from data rows
+* should_scrub_re: RE to remove a anchor from data rows
 * reject_sample_regex: RE to reject sample-id
+
+##### CSV options
+
+* header_replace: header for the mapping of the CSV file is given, existing is removed
+* header_provide: header for the mapping of the CSV file is given

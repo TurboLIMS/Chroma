@@ -53,7 +53,7 @@ describe Chroma do
         .to raise_error(Chroma::Errors::NotSupported)
   end
 
-  context "when given a file path" do
+  context "when given a file path (PDF)" do
 
     it "parses a PDF file (report_1) given the correct options" do
       parser =
@@ -327,6 +327,67 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
     end
 
   end
+
+  context "when given a file path (CSV)" do
+
+    it "parses the content correctly (report_1)" do
+      parser =
+        Chroma::Reader.new(
+          debug: true,
+          input: File.open('./spec/report_1.csv')
+        )
+
+        expect { parser.parse! }
+          .not_to raise_error
+
+      expect(parser.to_csv).to eq("sample_identity,cannabinoid_tetrahydrocannabinol_acid,cannabinoid_tetrahydrocannabinol,cannabinoid_cannabidiol,cannabinoid_cannabidiol_acid,cannabinoid_cannabigerol,cannabinoid_cannabinol\nMEOH-001,0.00025100000000000003,0.000298,9.2e-05,9.900000000000002e-05,0.00015900000000000002,0.000127\n3PARTSCBG_CCV-001,10.794871,12.332364000000002,10.964675,12.395207000000001\nTHCACBDA_CCV-001,9.084457,7.799966\n190307-001,6455.740000000001,5987.590000000001,8320.79,6368.1,5316.75,6600.88\n190307-002,9218.529999999999,9273.98,1586.03,7658.77,5128.75,3592.23\n")
+    end
+
+    it "replaces the header with the given header (report_2)" do
+      parser =
+        Chroma::Reader.new(
+          debug: true,
+          input: File.open('./spec/report_2.csv'),
+          header_replace: %w[sample_identity cannabinoid_tetrahydrocannabinol_acid cannabinoid_tetrahydrocannabinol cannabinoid_cannabidiol cannabinoid_cannabidiol_acid cannabinoid_cannabigerol cannabinoid_cannabinol]
+        )
+
+        expect { parser.parse! }
+          .not_to raise_error
+
+      expect(parser.to_csv).to eq("sample_identity,cannabinoid_tetrahydrocannabinol_acid,cannabinoid_tetrahydrocannabinol,cannabinoid_cannabidiol,cannabinoid_cannabidiol_acid,cannabinoid_cannabigerol,cannabinoid_cannabinol\nMEOH,1.9e-05,0.000329,5.2e-05,2.7e-05,0.000226,0.000108\n3PARTSCBG_CCV,7.658954,11.069287,8.205603,9.12997\nTHCACBDA_CCV,8.195203000000001,10.699973\n190307-003-10,1406.06,3869.2900000000004,4425.679999999999,7668.61,4599.49,4979.38\n190307-004-10,7651.78,6975.509999999999,725.47,699.98,4385.72,2354.0\nMEOH_B,0.000191,0.000179,3.7000000000000005e-05,5.5e-05,0.00016500000000000003,0.00014800000000000002\n")
+    end
+
+    it "provides a header (report_3)" do
+      parser =
+        Chroma::Reader.new(
+          debug: true,
+          input: File.open('./spec/report_3.csv'),
+          header_provide: %w[sample_identity cannabinoid_tetrahydrocannabinol_acid cannabinoid_tetrahydrocannabinol cannabinoid_cannabidiol cannabinoid_cannabidiol_acid cannabinoid_cannabigerol cannabinoid_cannabinol]
+        )
+
+        expect { parser.parse! }
+          .not_to raise_error
+
+      expect(parser.to_csv).to eq("sample_identity,cannabinoid_tetrahydrocannabinol_acid,cannabinoid_tetrahydrocannabinol,cannabinoid_cannabidiol,cannabinoid_cannabidiol_acid,cannabinoid_cannabigerol,cannabinoid_cannabinol\nMEOH,1.9e-05,0.000329,5.2e-05,2.7e-05,0.000226,0.000108\n3PARTSCBG_CCV,7.658954,11.069287,8.205603,9.12997\nTHCACBDA_CCV,8.195203000000001,10.699973\n190307-003-10,1406.06,3869.2900000000004,4425.679999999999,7668.61,4599.49,4979.38\n190307-004-10,7651.78,6975.509999999999,725.47,699.98,4385.72,2354.0\nMEOH_B,0.000191,0.000179,3.7000000000000005e-05,5.5e-05,0.00016500000000000003,0.00014800000000000002\n")
+    end
+
+  end
+
+  context "final mapping" do
+    it "parses the content correctly (report_1)" do
+      parser =
+        Chroma::Reader.new(
+          debug: true,
+          input: File.open('./spec/report_4.csv')
+        )
+
+        expect { parser.parse! }
+          .not_to raise_error
+
+      expect(parser.to_mapped).to eq([{'sample' => '1980-20', 'thc' => '12.3342', 'cbd' => '0.2312', 'cbn' => '1.3219'}])
+    end
+  end
+
 
   private
 

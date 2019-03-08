@@ -44,7 +44,7 @@ module Chroma
       when 'pdf'
         parse_pdf
       when 'csv'
-        raise Chroma::NotSupported.new("not implemented!")
+        parse_csv
       end
 
       true
@@ -57,6 +57,11 @@ module Chroma
           rows.each {|row| csv << row }
         end
       end
+    end
+
+    def to_mapped
+      return [] unless parsed?
+      rows.map{|line| Hash[[header,line].transpose] }
     end
 
     def parsed?
@@ -106,6 +111,28 @@ module Chroma
         self.header = opts[:header_sort]
         self.rows = index_vector.map {|idx| transposed_rows[idx] }.transpose
       end
+
+    end
+
+    def parse_csv
+      lines = CSV.read(input, 'r:bom|utf-8')
+
+      # TBD skip column, reorder column
+      # while (line = lines.shift)
+      # end
+
+      header =
+        if opts[:header_provide]
+          opts[:header_provide]
+        elsif opts[:header_replace]
+          lines.shift
+          opts[:header_replace]
+        else
+          lines.shift.map(&:downcase)
+        end
+
+      self.header = header
+      self.rows   = lines
 
     end
 

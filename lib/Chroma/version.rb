@@ -1,6 +1,6 @@
 module Chroma
-  MAJOR  = 1
+  MAJOR  = 2
   MINOR  = 0
-  BUILD  = 9
+  BUILD  = 0
   VERSION = [MAJOR, MINOR, BUILD].compact.join('.')
 end
