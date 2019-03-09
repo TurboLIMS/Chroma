@@ -12,7 +12,7 @@ Chroma.configure do |config|
 end
 
 
-$client = Chroma::Reader.new(debug: true)
+# $client = Chroma::Reader.new(debug: true)
 
 require "pry"
 puts "use $client"

@@ -4,50 +4,32 @@ module Chroma
 
   class Reader
 
-    attr_accessor :debug,
+    attr_accessor :content_type,
+                  :checksum,
+                  :download,
                   :opts,
-                  :input,
+                  :debug,
                   :header,
                   :rows
 
-    EXT_REGEX = %r(\.(pdf|csv)\z)
-
-    def initialize(opts = {})
+    # ActiveStorage::Blob
+    def initialize(active_storage_blob, opts = {})
+      self.content_type = active_storage_blob.content_type
+      self.checksum = active_storage_blob.checksum
+      self.download = active_storage_blob.download
       self.opts  = opts.reject{ |_,v| v.nil? || v == '' }
-      self.input = opts[:input]
-      self.rows  = []
       self.debug = opts[:debug]
-    end
 
-    def valid_file?
-      !input.nil? &&
-        ( input.is_a?(File) || File.exist?(input) )
-    end
-
-    def filename
-      input.respond_to?(:path) ? input.path : input
+      self.rows = []
+      parse!
     end
 
     def valid_filetype?
-      filename =~ EXT_REGEX
+      content_type == 'text/csv' || content_type == 'text/pdf'
     end
 
-    def filetype
-      filename.match(EXT_REGEX)[1]
-    end
-
-    def parse!
-      raise Chroma::NotFound.new("file not found: #{input}") if !valid_file?
-      raise Chroma::NotSupported.new("file type not supported: #{input}") if !valid_filetype?
-
-      case filetype
-      when 'pdf'
-        parse_pdf
-      when 'csv'
-        parse_csv
-      end
-
-      true
+    def parsed?
+      rows.any?
     end
 
     def to_csv
@@ -60,18 +42,26 @@ module Chroma
     end
 
     def to_mapped
-      return [] unless parsed?
       rows.map{|line| Hash[[header,line].transpose] }
-    end
-
-    def parsed?
-      !header.nil?
     end
 
     private
 
+    def parse!
+      raise Chroma::NotSupported.new("file type not supported: #{input}") if !valid_filetype?
+
+      case content_type
+      when 'text/pdf'
+        parse_pdf
+      when 'text/csv'
+        parse_csv
+      end
+
+      true
+    end
+
     def parse_pdf
-      reader = PDF::Reader.new(input)
+      reader = PDF::Reader.new(StringIO.new(download))
       lines  = reader.pages.first.text.split(%r(\n))
       while (line = lines.shift)
 
@@ -115,7 +105,7 @@ module Chroma
     end
 
     def parse_csv
-      lines = CSV.read(input, 'r:bom|utf-8')
+      lines = CSV.parse(download)
 
       # TBD skip column, reorder column
       # while (line = lines.shift)

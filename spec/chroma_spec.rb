@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'ostruct'
 
 describe Chroma do
   before(:each) { configure_client }
@@ -17,55 +18,23 @@ describe Chroma do
   end
 
 
-  it 'initializes with no parameters' do
-
-    expect { Chroma::Reader.new }
-      .not_to raise_error
-  end
-
-  it 'initializes with parameters' do
-
-    expect { Chroma::Reader.new(debug: true) }
-      .not_to raise_error
-  end
-
-  it 'is not parsed? at initialization' do
-    parser = Chroma::Reader.new(debug: true)
-
-    expect(parser.parsed?).to be false
-  end
-
-  it "accepts a file name during initialization" do
-    parser = Chroma::Reader.new(debug: true, input: 'file.txt')
-
-    expect(parser.input).to eq('file.txt')
-    expect(parser.valid_file?).to be false
-  end
-
-  it "raises an error when parsing is requested without a valid file" do
-
-    parser = Chroma::Reader.new(debug: true)
-    expect { parser.parse! }
-      .to raise_error(Chroma::Errors::NotFound)
-
-    parser = Chroma::Reader.new(debug: true, input: './spec/file.txt')
-      expect { parser.parse! }
-        .to raise_error(Chroma::Errors::NotSupported)
-  end
-
   context "when given a file path (PDF)" do
 
     it "parses a PDF file (report_1) given the correct options" do
       parser =
         Chroma::Reader.new(
+          OpenStruct.new(
+            content_type: 'text/pdf',
+            checksum: 'spec',
+            download: File.read('./spec/report_1.pdf')
+          ),
           debug: true,
-          input: './spec/report_1.pdf',
           header_regex: %r(\s*Sample\s+),
           row_regex: %r(^\s([*#]){1,2}\s),
           column_regex: %r(\s+),
           should_scrub_re: true
         )
-      expect { parser.parse! }
+      expect { parser }
         .not_to raise_error
 
       expect(parser.parsed?).to be true
@@ -76,8 +45,12 @@ describe Chroma do
     it "rejects incorrect, nil and empty options" do
       parser =
         Chroma::Reader.new(
+          OpenStruct.new(
+            content_type: 'text/pdf',
+            checksum: 'spec',
+            download: File.read('./spec/report_1.pdf')
+          ),
           debug: true,
-          input: './spec/report_1.pdf',
           header_regex: %r(\s*Sample\s+),
           ainz: 100,
           header_prepend: "",
@@ -85,7 +58,7 @@ describe Chroma do
           column_regex: %r(\s+),
           should_scrub_re: true
         )
-      expect { parser.parse! }
+      expect { parser }
         .not_to raise_error
 
       expect(parser.parsed?).to be true
@@ -96,14 +69,18 @@ describe Chroma do
     it "generates a valid CSV from PDF (report_1) given the correct options" do
       parser =
         Chroma::Reader.new(
+          OpenStruct.new(
+            content_type: 'text/pdf',
+            checksum: 'spec',
+            download: File.read('./spec/report_1.pdf')
+          ),
           debug: true,
-          input: './spec/report_1.pdf',
           header_regex: %r(\s*Sample\s+),
           row_regex: %r(^\s([*#]){1,2}\s),
           column_regex: %r(\s+),
           should_scrub_re: true
         )
-      expect { parser.parse! }
+      expect { parser }
         .not_to raise_error
 
       expect(parser.to_csv).to eq(
@@ -121,8 +98,12 @@ CCV1,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000\n")
     it "parses a PDF file (report_2) given the correct options" do
       parser =
         Chroma::Reader.new(
+          OpenStruct.new(
+            content_type: 'text/pdf',
+            checksum: 'spec',
+            download: File.read('./spec/report_2.pdf')
+          ),
           debug: true,
-          input: './spec/report_2.pdf',
           header_regex: %r(Sample ID \|\|),
           header_column_regex: %r(\s\|\|\s),
           row_regex: %r(^Sample_),
@@ -130,7 +111,7 @@ CCV1,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000\n")
           should_scrub_re: false
         )
 
-        expect { parser.parse! }
+        expect { parser }
           .not_to raise_error
 
       expect(parser.header).to eq(["Sample ID","CBDV","THCV","CBD","CBG","CBDA","CBGA","CBN","THC","d8-THC","CBC","THCA"])
@@ -140,15 +121,19 @@ CCV1,0.00000,0.00000,0.00000,0.00000,0.00000,0.00000\n")
     it "generates a valid CSV from PDF (report_2) given the correct options" do
       parser =
         Chroma::Reader.new(
+          OpenStruct.new(
+            content_type: 'text/pdf',
+            checksum: 'spec',
+            download: File.read('./spec/report_2.pdf')
+          ),
           debug: true,
-          input: './spec/report_2.pdf',
           header_regex: %r(Sample ID \|\|),
           header_column_regex: %r(\s\|\|\s),
           row_regex: %r(^Sample_),
           column_regex: %r(\s+),
           should_scrub_re: false
         )
-      expect { parser.parse! }
+      expect { parser }
         .not_to raise_error
 
       expect(parser.to_csv).to eq("Sample ID,CBDV,THCV,CBD,CBG,CBDA,CBGA,CBN,THC,d8-THC,CBC,THCA\n\
@@ -160,8 +145,12 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
     it "parses a PDF file (report_3) given the correct options" do
       parser =
         Chroma::Reader.new(
+          OpenStruct.new(
+            content_type: 'text/pdf',
+            checksum: 'spec',
+            download: File.read('./spec/report_3.pdf')
+          ),
           debug: true,
-          input: './spec/report_3.pdf',
           header_regex: %r(^\s+_),
           header_prepend: 'Sample ID',
           row_regex: %r(\s%),
@@ -169,7 +158,7 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
           should_scrub_re: false
         )
 
-        expect { parser.parse! }
+        expect { parser }
           .not_to raise_error
 
       expect(parser.header).to eq(["Sample ID", "_THC","_CBD","_CBN"])
@@ -179,8 +168,12 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
     it "generates a valid CSV from PDF (report_3) given the correct options" do
       parser =
         Chroma::Reader.new(
+          OpenStruct.new(
+            content_type: 'text/pdf',
+            checksum: 'spec',
+            download: File.read('./spec/report_3.pdf')
+          ),
           debug: true,
-          input: './spec/report_3.pdf',
           header_regex: %r(^\s+_),
           header_prepend: 'Sample ID',
           row_regex: %r(\s%),
@@ -188,7 +181,7 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
           should_scrub_re: false
         )
 
-        expect { parser.parse! }
+        expect { parser }
           .not_to raise_error
 
       expect(parser.to_csv).to eq("Sample ID,_THC,_CBD,_CBN\n99,0.03 %,0.0 %,8.2 %\n100,0.0 %,12.7 %,0.0%\n")
@@ -197,8 +190,12 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
     it "skips columns programmatically with skip_column" do
       parser =
         Chroma::Reader.new(
+          OpenStruct.new(
+            content_type: 'text/pdf',
+            checksum: 'spec',
+            download: File.read('./spec/report_5.pdf')
+          ),
           debug: true,
-          input: './spec/report_5.pdf',
           header_regex: %r(^\s+Sample\s+),
           skip_column: [1,3,5,7,9,11],
           row_regex: %r(^\s*\#\s+),
@@ -206,7 +203,7 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
           should_scrub_re: true
         )
 
-      expect { parser.parse! }
+      expect { parser }
         .not_to raise_error
       expect(parser.header).to eq(["Sample", "CBDA", "CBG", "CBD", "CBN", "THC", "THCA"])
       expect(parser.rows.count).to eq(17)
@@ -215,8 +212,12 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
     it "accepts strings as regular expressions" do
       parser =
         Chroma::Reader.new(
+          OpenStruct.new(
+            content_type: 'text/pdf',
+            checksum: 'spec',
+            download: File.read('./spec/report_5.pdf')
+          ),
           debug: true,
-          input: './spec/report_5.pdf',
           header_regex: "^\s+Sample\s+",
           skip_column: [1,3,5,7,9,11],
           row_regex: "^\s*\#\s+",
@@ -224,7 +225,7 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
           should_scrub_re: true
         )
 
-      expect { parser.parse! }
+      expect { parser }
         .not_to raise_error
       expect(parser.header).to eq(["Sample", "CBDA", "CBG", "CBD", "CBN", "THC", "THCA"])
       expect(parser.rows.count).to eq(17)
@@ -233,8 +234,12 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
     it "skip sample-id programmatically with reject_sample_regex" do
       parser =
         Chroma::Reader.new(
+          OpenStruct.new(
+            content_type: 'text/pdf',
+            checksum: 'spec',
+            download: File.read('./spec/report_5.pdf')
+          ),
           debug: true,
-          input: './spec/report_5.pdf',
           header_regex: %r(^\s+Sample\s+),
           skip_column: [1,3,5,7,9,11],
           row_regex: %r(^\s*\#\s+),
@@ -243,7 +248,7 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
           reject_sample_regex: %r(\D)
         )
 
-      expect { parser.parse! }
+      expect { parser }
         .not_to raise_error
       expect(parser.rows.count).to eq(14)
     end
@@ -251,8 +256,12 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
     it "reorders columns programmatically with header_sort" do
       parser =
         Chroma::Reader.new(
+          OpenStruct.new(
+            content_type: 'text/pdf',
+            checksum: 'spec',
+            download: File.read('./spec/report_5.pdf')
+          ),
           debug: true,
-          input: './spec/report_5.pdf',
           header_regex: %r(^\s+Sample\s+),
           skip_column: [1,3,5,7,9,11],
           header_sort: %w(Sample THC THCA CBD CBDA CBN CBG),
@@ -262,7 +271,7 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
           reject_sample_regex: %r(\D)
         )
 
-      expect { parser.parse! }
+      expect { parser }
         .not_to raise_error
 
       expect(parser.header).to eq(["Sample", "THC", "THCA", "CBD", "CBDA", "CBN", "CBG"])
@@ -270,10 +279,14 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
     end
 
     it "rejects an incompatible header_sort directive" do
-      parser =
+      expect{
         Chroma::Reader.new(
+          OpenStruct.new(
+            content_type: 'text/pdf',
+            checksum: 'spec',
+            download: File.read('./spec/report_5.pdf')
+          ),
           debug: true,
-          input: './spec/report_5.pdf',
           header_regex: %r(^\s+Sample\s+),
           skip_column: [1,3,5,7,9,11],
           header_sort: %w(Sample Thc_ Thca_ Cbd_ Cbda_ Cbn_ Cbg_),
@@ -282,9 +295,10 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
           should_scrub_re: true,
           reject_sample_regex: %r(\D)
         )
+      }.to raise_error(Chroma::Errors::BadInput)
 
-      expect { parser.parse! }
-        .to raise_error(Chroma::Errors::BadInput)
+
+
     end
   end
 
@@ -292,8 +306,12 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
     it "parses a PDF file (report_3) given the correct options" do
       parser =
         Chroma::Reader.new(
+          OpenStruct.new(
+            content_type: 'text/pdf',
+            checksum: 'spec',
+            download: File.read('./spec/report_3.pdf')
+          ),
           debug: true,
-          input: File.open('./spec/report_3.pdf'),
           header_regex: %r(^\s+_),
           header_prepend: 'Sample ID',
           row_regex: %r(\s%),
@@ -301,7 +319,7 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
           should_scrub_re: false
         )
 
-        expect { parser.parse! }
+        expect { parser }
           .not_to raise_error
 
       expect(parser.header).to eq(["Sample ID", "_THC","_CBD","_CBN"])
@@ -311,8 +329,12 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
     it "generates a valid CSV from PDF (report_3) given the correct options" do
       parser =
         Chroma::Reader.new(
+          OpenStruct.new(
+            content_type: 'text/pdf',
+            checksum: 'spec',
+            download: File.read('./spec/report_3.pdf')
+          ),
           debug: true,
-          input: File.open('./spec/report_3.pdf'),
           header_regex: %r(^\s+_),
           header_prepend: 'Sample ID',
           row_regex: %r(\s%),
@@ -320,7 +342,7 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
           should_scrub_re: false
         )
 
-        expect { parser.parse! }
+        expect { parser }
           .not_to raise_error
 
       expect(parser.to_csv).to eq("Sample ID,_THC,_CBD,_CBN\n99,0.03 %,0.0 %,8.2 %\n100,0.0 %,12.7 %,0.0%\n")
@@ -333,11 +355,15 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
     it "parses the content correctly (report_1)" do
       parser =
         Chroma::Reader.new(
-          debug: true,
-          input: File.open('./spec/report_1.csv')
+          OpenStruct.new(
+            content_type: 'text/csv',
+            checksum: 'spec',
+            download: File.read('./spec/report_1.csv')
+          ),
+          debug: true
         )
 
-        expect { parser.parse! }
+        expect { parser }
           .not_to raise_error
 
       expect(parser.to_csv).to eq("sample_identity,cannabinoid_tetrahydrocannabinol_acid,cannabinoid_tetrahydrocannabinol,cannabinoid_cannabidiol,cannabinoid_cannabidiol_acid,cannabinoid_cannabigerol,cannabinoid_cannabinol\nMEOH-001,0.00025100000000000003,0.000298,9.2e-05,9.900000000000002e-05,0.00015900000000000002,0.000127\n3PARTSCBG_CCV-001,10.794871,12.332364000000002,10.964675,12.395207000000001\nTHCACBDA_CCV-001,9.084457,7.799966\n190307-001,6455.740000000001,5987.590000000001,8320.79,6368.1,5316.75,6600.88\n190307-002,9218.529999999999,9273.98,1586.03,7658.77,5128.75,3592.23\n")
@@ -346,12 +372,16 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
     it "replaces the header with the given header (report_2)" do
       parser =
         Chroma::Reader.new(
+          OpenStruct.new(
+            content_type: 'text/csv',
+            checksum: 'spec',
+            download: File.read('./spec/report_2.csv')
+          ),
           debug: true,
-          input: File.open('./spec/report_2.csv'),
           header_replace: %w[sample_identity cannabinoid_tetrahydrocannabinol_acid cannabinoid_tetrahydrocannabinol cannabinoid_cannabidiol cannabinoid_cannabidiol_acid cannabinoid_cannabigerol cannabinoid_cannabinol]
         )
 
-        expect { parser.parse! }
+        expect { parser }
           .not_to raise_error
 
       expect(parser.to_csv).to eq("sample_identity,cannabinoid_tetrahydrocannabinol_acid,cannabinoid_tetrahydrocannabinol,cannabinoid_cannabidiol,cannabinoid_cannabidiol_acid,cannabinoid_cannabigerol,cannabinoid_cannabinol\nMEOH,1.9e-05,0.000329,5.2e-05,2.7e-05,0.000226,0.000108\n3PARTSCBG_CCV,7.658954,11.069287,8.205603,9.12997\nTHCACBDA_CCV,8.195203000000001,10.699973\n190307-003-10,1406.06,3869.2900000000004,4425.679999999999,7668.61,4599.49,4979.38\n190307-004-10,7651.78,6975.509999999999,725.47,699.98,4385.72,2354.0\nMEOH_B,0.000191,0.000179,3.7000000000000005e-05,5.5e-05,0.00016500000000000003,0.00014800000000000002\n")
@@ -360,12 +390,16 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
     it "provides a header (report_3)" do
       parser =
         Chroma::Reader.new(
+          OpenStruct.new(
+            content_type: 'text/csv',
+            checksum: 'spec',
+            download: File.read('./spec/report_3.csv')
+          ),
           debug: true,
-          input: File.open('./spec/report_3.csv'),
           header_provide: %w[sample_identity cannabinoid_tetrahydrocannabinol_acid cannabinoid_tetrahydrocannabinol cannabinoid_cannabidiol cannabinoid_cannabidiol_acid cannabinoid_cannabigerol cannabinoid_cannabinol]
         )
 
-        expect { parser.parse! }
+        expect { parser }
           .not_to raise_error
 
       expect(parser.to_csv).to eq("sample_identity,cannabinoid_tetrahydrocannabinol_acid,cannabinoid_tetrahydrocannabinol,cannabinoid_cannabidiol,cannabinoid_cannabidiol_acid,cannabinoid_cannabigerol,cannabinoid_cannabinol\nMEOH,1.9e-05,0.000329,5.2e-05,2.7e-05,0.000226,0.000108\n3PARTSCBG_CCV,7.658954,11.069287,8.205603,9.12997\nTHCACBDA_CCV,8.195203000000001,10.699973\n190307-003-10,1406.06,3869.2900000000004,4425.679999999999,7668.61,4599.49,4979.38\n190307-004-10,7651.78,6975.509999999999,725.47,699.98,4385.72,2354.0\nMEOH_B,0.000191,0.000179,3.7000000000000005e-05,5.5e-05,0.00016500000000000003,0.00014800000000000002\n")
@@ -377,11 +411,15 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
     it "parses the content correctly (report_1)" do
       parser =
         Chroma::Reader.new(
-          debug: true,
-          input: File.open('./spec/report_4.csv')
+          OpenStruct.new(
+            content_type: 'text/csv',
+            checksum: 'spec',
+            download: File.read('./spec/report_4.csv')
+          ),
+          debug: true
         )
 
-        expect { parser.parse! }
+        expect { parser }
           .not_to raise_error
 
       expect(parser.to_mapped).to eq([{'sample' => '1980-20', 'thc' => '12.3342', 'cbd' => '0.2312', 'cbn' => '1.3219'}])
