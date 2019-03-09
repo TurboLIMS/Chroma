@@ -43,13 +43,16 @@ module Chroma
 
     def to_mapped
       raise Chroma::BadInput.new('Malformed CSV file') if rows.any? { |row| row.length != header.length }
-      rows.map{|line| Hash[[header,line].transpose] }
+      rows.map do |line|
+        line.map!{|element| Helper.maybe_numeric(element)}
+        Hash[[header,line].transpose]
+      end
     end
 
     private
 
     def parse!
-      raise Chroma::NotSupported.new("file type not supported: #{input}") if !valid_filetype?
+      raise Chroma::NotSupported.new("file type not supported") if !valid_filetype?
 
       case content_type
       when 'text/pdf'

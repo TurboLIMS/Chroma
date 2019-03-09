@@ -39,5 +39,9 @@ module Chroma
       obj.is_a?(Regexp) ? obj : Regexp.new(obj) rescue obj
     end
 
+    def self.maybe_numeric(input)
+      Integer(input) rescue Float(input) rescue input
+    end
+
   end
 end

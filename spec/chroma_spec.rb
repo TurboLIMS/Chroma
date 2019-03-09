@@ -422,7 +422,7 @@ Sample_37,341.68,780.786,679.52,843.436,613.123,729.566,94.02,454.303,584.151,15
         expect { parser }
           .not_to raise_error
 
-      expect(parser.to_mapped).to eq([{'sample' => '1980-20', 'thc' => '12.3342', 'cbd' => '0.2312', 'cbn' => '1.3219'}])
+      expect(parser.to_mapped).to eq([{'sample' => '1980-20', 'thc' => 12.3342, 'cbd' => 0.2312, 'cbn' => 1.3219}])
     end
   end
 
