@@ -42,6 +42,7 @@ module Chroma
     end
 
     def to_mapped
+      raise Chroma::BadInput.new('Malformed CSV file') if rows.any? { |row| row.length != header.length }
       rows.map{|line| Hash[[header,line].transpose] }
     end
 
