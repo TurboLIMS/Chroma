@@ -122,7 +122,7 @@ module Chroma
           lines.shift
           opts[:header_replace]
         else
-          lines.shift.map(&:downcase)
+          lines.shift.map {|x| x.try(:downcase) }
         end
 
       self.header = header
